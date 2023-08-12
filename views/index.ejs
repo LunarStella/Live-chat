@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room</title>
+  </head>
+  <body>
+    <h1>Create a New Room</h1>
+    <form action="/chat" method="POST">
+      <label for="roomName">Room Name:</label>
+      <input type="text" id="roomName" name="roomName" required />
+      <button type="submit">Create Room</button>
+    </form>
+
+    <h1>Available Rooms</h1>
+    <div id="roomList">
+      <!-- 방 목록이 동적으로 추가될 공간 -->
+      <% roomList.forEach((roomName) => { %>
+      <div>
+        <!-- 이름 표시 -->
+        <span><%= roomName %></span>
+
+        <!-- 입장 버튼 생성 -->
+        <button onclick="enterRoom('<%= roomName %>')">Enter</button>
+      </div>
+      <% }); %>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+      // 방으로 입장하는 함수
+      function enterRoom(roomName) {
+        window.location.href = `/chat/${roomName}`;
+      }
+    </script>
+  </body>
+</html>

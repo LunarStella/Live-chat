@@ -6,7 +6,9 @@
     <title>Socket.io Room Test</title>
   </head>
   <body>
-    <h1 id="roomNameDisplay">chatroom</h1>
+    <h1 id="roomNameDisplay">
+      <%= roomName ? `chatroom: ${roomName}` : "Not in any room" %>
+    </h1>
     <ul id="messages" type="none">
       <li id="usercount"></li>
     </ul>
@@ -20,7 +22,6 @@
       const socket = io("/server1");
       const urlPath = window.location.pathname;
       const roomName = urlPath.slice(urlPath.lastIndexOf("/") + 1);
-      console.log("roomname: ", roomName);
 
       document.addEventListener("DOMContentLoaded", () => {
         joinRoom();
@@ -63,13 +64,6 @@
         const messageParagraph = document.createElement("p");
         messageParagraph.textContent = message;
         chatMessagesDiv.appendChild(messageParagraph);
-      }
-
-      function updateRoomNameDisplay() {
-        const roomNameDisplay = document.getElementById("roomNameDisplay");
-        roomNameDisplay.textContent = roomName
-          ? `chatroom: ${roomName}`
-          : "Not in any room";
       }
     </script>
   </body>

@@ -13,14 +13,15 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(express.static("public"));
+app.set("view engine", "ejs");
+app.set("views", "views");
+
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 dotenv.config({ path: "./config.env" });
 
 app.use("/chat", roomRouter);
-app.get("/rooms", roomController.getAllRooms);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
