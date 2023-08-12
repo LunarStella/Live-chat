@@ -5,28 +5,26 @@ const url = require("url");
 const AppError = require("../utils/appError");
 
 // DB 모든 room 이름만 가져옴
-const getAllRoomsName = catchAsync(async (req, res) => {
+exports.getAllRoomsName = catchAsync(async (req, res, next) => {
   // MongoDB에서 rooms 컬렉션의 roomName 필드만 조회하여 배열로 가져오기
-  const roomsData = await Room.find({}, { roomName: 1, _id: 0 });
-  console.log(roomsData);
-
-  return roomsData;
-});
-
-exports.enterMainRoom = async (req, res, next) => {
-  // DB 모든 room 이름만 가져옴
-  // 나중에 따로 함수화
   roomsData = await Room.find({}, { roomName: 1, _id: 0 });
   roomList = roomsData.map((room) => room.roomName);
 
-  res.render("index", { roomList });
+  //req에 roomList 추가
+  req.body.roomList = roomList;
+
+  next();
+});
+
+exports.enterMainRoom = async (req, res, next) => {
+  //roomList 개설된 채팅방 나타냄
+  res.status(200).render("index", { roomList });
 };
 
 exports.enterSpecificRoom = (req, res, next) => {
   const roomId = req.params.id; // :id에 해당하는 값 가져오기
-  // roomId를 이용하여 해당 방의 데이터를 가져오거나, 해당 방으로 접속 등의 처리를 수행합니다.
 
-  // html 파일뿐만 아니라 req.params.id도 같이 front에 전달
+  // roomId를 이용하여 해당 방의 데이터를 가져오거나, 해당 방으로 접속 등의 처리를 수행합니다.
   res.render("chatroom", { roomName: roomId });
 };
 
