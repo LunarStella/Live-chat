@@ -1,7 +1,5 @@
 const Room = require("../models/roomModel");
 const catchAsync = require("../utils/catchAsync");
-const path = require("path");
-const url = require("url");
 const AppError = require("../utils/appError");
 
 // DB 모든 room 이름만 가져옴
@@ -53,5 +51,3 @@ exports.protectRoom = catchAsync(async (req, res, next) => {
 
   next();
 });
-
-exports.changeRoomName = (req, res, next) => {};

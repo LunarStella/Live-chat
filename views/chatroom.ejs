@@ -4,67 +4,77 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Socket.io Room Test</title>
+    <style>
+      /* 채팅 메시지 스타일링 */
+      .message-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+        max-width: 80%; /* 최대 너비 설정 (화면 크기에 따라 조정) */
+        word-wrap: break-word; /* 긴 텍스트 줄 바꿈 */
+        font-size: 12px;
+      }
+
+      .my-message {
+        color: #0074e4; /* 텍스트 색상 설정 */
+        align-self: flex-end; /* 오른쪽 정렬 (나의 메시지) */
+      }
+    </style>
   </head>
   <body>
     <h1 id="roomNameDisplay">
       <%= roomName ? `chatroom: ${roomName}` : "Not in any room" %>
     </h1>
-    <ul id="messages" type="none">
-      <li id="usercount"></li>
-    </ul>
-    <input type="text" id="messageInput" placeholder="Type your message" />
-    <button onclick="sendMessage()">Send</button>
-    <button onclick="leaveRoom()">Leave Room</button>
-    <div id="chat-messages"></div>
+
+    <input type="text" id="message-input" placeholder="메시지 입력" />
+    <button id="send-button">전송</button>
+    <div id="chat-messages" class="message-container"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      const socket = io("/server1");
+      function joinRoomEmit() {
+        socket.emit("joinRoom", roomName);
+      }
+
+      // url parameter에서 방 이름 가져옴
+      const socket = io("/chatServer");
       const urlPath = window.location.pathname;
       const roomName = urlPath.slice(urlPath.lastIndexOf("/") + 1);
 
+      const messageInput = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-button");
+      const chatMessages = document.getElementById("chat-messages");
+
+      // DOM 로드 후 joinRoom emit
+      // room 이름에 해당하는 socket io room 입장
       document.addEventListener("DOMContentLoaded", () => {
-        joinRoom();
+        joinRoomEmit();
       });
 
-      socket.on("usercount", (count) => {
-        var userCounter = document.getElementById("usercount");
-        userCounter.innerText = "현재 " + count + "명이 서버에 접속해있습니다.";
+      // button 클릭시 메세지 전송
+      sendButton.addEventListener("click", () => {
+        const message = messageInput.value;
+        socket.emit("sendChatMessage", roomName, message);
+        messageInput.value = ""; // 입력 필드 초기화
       });
 
-      socket.on("newMessage", (message) => {
-        console.log("client received: ", message);
-        displayMessage(message);
+      // 새로운 메세지 오면 추가
+      socket.on("newChatMessage", (chat) => {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message");
+        if (chat.socketId === socket.id) {
+          messageDiv.classList.add("my-message");
+        }
+        messageDiv.textContent = `${chat.socketId} : ${chat.message}`;
+        chatMessages.appendChild(messageDiv);
       });
 
+      // disconnect시 서버에 알림 <FIX>
       socket.on("disconnect", () => {
         console.log("서버와의 연결이 해제되었습니다.");
+        socket.emit("disconnectedUser", socket.id);
       });
-
-      function joinRoom() {
-        socket.emit("joinRoom", roomName);
-        updateRoomNameDisplay();
-      }
-
-      function sendMessage() {
-        const message = document.getElementById("messageInput").value;
-        console.log("client send: ", message);
-
-        socket.emit("sendMessage", roomName, message);
-      }
-
-      function leaveRoom() {
-        socket.emit("disconnectRoom", roomName);
-        roomName = ""; // 방을 나갈 때 현재 방 이름 초기화
-        updateRoomNameDisplay();
-      }
-
-      function displayMessage(message) {
-        const chatMessagesDiv = document.getElementById("chat-messages");
-        const messageParagraph = document.createElement("p");
-        messageParagraph.textContent = message;
-        chatMessagesDiv.appendChild(messageParagraph);
-      }
     </script>
+    <script src="/js/mainchat.js"></script>
   </body>
 </html>

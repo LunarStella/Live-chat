@@ -1,17 +1,19 @@
 const express = require("express");
 const app = express();
 
-const roomController = require("./controllers/roomController");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const roomRouter = require("./routes/roomRoutes");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+
+app.use(cookieParser()); // get요청이 오면 uri변수들이 파싱되어 req.cookies객체에 저장된다.
 
 app.set("view engine", "ejs");
 app.set("views", "views");
